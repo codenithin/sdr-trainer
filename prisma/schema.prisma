@@ -1,0 +1,93 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             Int               @id @default(autoincrement())
+  email          String            @unique
+  hashedPassword String
+  fullName       String
+  isActive       Boolean           @default(true)
+  createdAt      DateTime          @default(now())
+  sessions       RoleplaySession[]
+
+  @@map("users")
+}
+
+model Persona {
+  id                 Int               @id @default(autoincrement())
+  name               String
+  roleTitle          String
+  personalitySummary String
+  systemPrompt       String
+  difficulty         String
+  avatarEmoji        String            @default("👤")
+  traits             String
+  sessions           RoleplaySession[]
+
+  @@map("personas")
+}
+
+model Script {
+  id              Int               @id @default(autoincrement())
+  title           String
+  description     String
+  industry        String
+  companySize     String
+  targetLocation  String
+  productName     String
+  targetRole      String
+  difficultyLevel String            @default("intermediate")
+  createdAt       DateTime          @default(now())
+  sections        ScriptSection[]
+  sessions        RoleplaySession[]
+
+  @@map("scripts")
+}
+
+model ScriptSection {
+  id            Int     @id @default(autoincrement())
+  scriptId      Int
+  sectionType   String
+  title         String
+  content       String
+  talkingPoints String?
+  tips          String?
+  orderIndex    Int
+  script        Script  @relation(fields: [scriptId], references: [id], onDelete: Cascade)
+
+  @@map("script_sections")
+}
+
+model RoleplaySession {
+  id              Int                @id @default(autoincrement())
+  userId          Int
+  scriptId        Int
+  personaId       Int
+  startedAt       DateTime           @default(now())
+  endedAt         DateTime?
+  isActive        Boolean            @default(true)
+  feedbackSummary String?
+  user            User               @relation(fields: [userId], references: [id])
+  script          Script             @relation(fields: [scriptId], references: [id])
+  persona         Persona            @relation(fields: [personaId], references: [id])
+  messages        RoleplayMessage[]
+
+  @@map("roleplay_sessions")
+}
+
+model RoleplayMessage {
+  id        Int              @id @default(autoincrement())
+  sessionId Int
+  role      String
+  content   String
+  createdAt DateTime         @default(now())
+  session   RoleplaySession  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@map("roleplay_messages")
+}
