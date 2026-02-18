@@ -3,8 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DATABASE_URL_UNPOOLED")
 }
 
 model User {
@@ -23,11 +24,11 @@ model Persona {
   id                 Int               @id @default(autoincrement())
   name               String
   roleTitle          String
-  personalitySummary String
-  systemPrompt       String
+  personalitySummary String            @db.Text
+  systemPrompt       String            @db.Text
   difficulty         String
   avatarEmoji        String            @default("👤")
-  traits             String
+  traits             String            @db.Text
   sessions           RoleplaySession[]
 
   @@map("personas")
@@ -36,7 +37,7 @@ model Persona {
 model Script {
   id              Int               @id @default(autoincrement())
   title           String
-  description     String
+  description     String            @db.Text
   industry        String
   companySize     String
   targetLocation  String
@@ -55,9 +56,9 @@ model ScriptSection {
   scriptId      Int
   sectionType   String
   title         String
-  content       String
-  talkingPoints String?
-  tips          String?
+  content       String  @db.Text
+  talkingPoints String? @db.Text
+  tips          String? @db.Text
   orderIndex    Int
   script        Script  @relation(fields: [scriptId], references: [id], onDelete: Cascade)
 
@@ -72,7 +73,7 @@ model RoleplaySession {
   startedAt       DateTime           @default(now())
   endedAt         DateTime?
   isActive        Boolean            @default(true)
-  feedbackSummary String?
+  feedbackSummary String?            @db.Text
   user            User               @relation(fields: [userId], references: [id])
   script          Script             @relation(fields: [scriptId], references: [id])
   persona         Persona            @relation(fields: [personaId], references: [id])
@@ -85,7 +86,7 @@ model RoleplayMessage {
   id        Int              @id @default(autoincrement())
   sessionId Int
   role      String
-  content   String
+  content   String           @db.Text
   createdAt DateTime         @default(now())
   session   RoleplaySession  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 
