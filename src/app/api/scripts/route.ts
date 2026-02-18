@@ -17,11 +17,11 @@ export async function GET(req: NextRequest) {
   const where: Record<string, unknown> = {};
   if (industry) where.industry = industry;
   if (companySize) where.companySize = companySize;
-  if (location) where.targetLocation = { contains: location };
+  if (location) where.targetLocation = { contains: location, mode: "insensitive" };
   if (search) {
     where.OR = [
-      { title: { contains: search } },
-      { description: { contains: search } },
+      { title: { contains: search, mode: "insensitive" } },
+      { description: { contains: search, mode: "insensitive" } },
     ];
   }
 
